@@ -10,7 +10,10 @@ def home_view(request,*args,**kwargs):
 def tweet_list_view(request,*args,**kwargs):
     QuerySet = Tweet.objects.all()
     tweetsList = [{"id":tweet.id,"content":tweet.content} for tweet in QuerySet]
-    data = {"response":tweetsList}
+    data = {
+        "isUser":False,
+        "response":tweetsList
+    }
     return JsonResponse(data)
 
 def tweet_detail_view(request,tweet_id,*args,**kwargs):
