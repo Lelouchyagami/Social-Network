@@ -1,3 +1,4 @@
+import random
 from django.shortcuts import render , redirect
 from django.conf import settings
 from django.http import HttpResponse,Http404, JsonResponse
@@ -17,6 +18,8 @@ def tweet_create_view(request,*args,**kwargs):
     if form.is_valid():
         obj = form.save(commit=False)
         obj.save()
+        if request.is_ajax():
+            return JsonResponse(obj.serialize(), status=201)
         if next_url != None and is_safe_url(next_url, ALLOWED_HOSTS):
             return redirect(next_url)
         form=TweetForm()
@@ -24,7 +27,7 @@ def tweet_create_view(request,*args,**kwargs):
 
 def tweet_list_view(request,*args,**kwargs):
     QuerySet = Tweet.objects.all()
-    tweetsList = [{"id":tweet.id,"content":tweet.content} for tweet in QuerySet]
+    tweetsList = [tweet.serialize() for tweet in QuerySet]
     data = {
         "isUser":False,
         "response":tweetsList
