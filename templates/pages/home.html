@@ -82,6 +82,10 @@ function handleTweetCreateFormDidSumbit(event) {
             alert("Please login to tweet")
             window.location.href = "/login"
         }
+        else if (xhr.status === 403){
+            alert("Forbidden.Please login to tweet")
+            window.location.href = "/login"
+        }
         else if (xhr.status === 500){
             alert("There was a server error. Please try again later.")
         }

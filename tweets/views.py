@@ -3,8 +3,11 @@ from django.shortcuts import render , redirect
 from django.conf import settings
 from django.http import HttpResponse,Http404, JsonResponse
 from django.utils.http import is_safe_url
-from rest_framework.decorators import api_view
+
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.decorators import api_view,authentication_classes,permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 from .forms import TweetForm
 from .models import Tweet
@@ -16,6 +19,7 @@ def home_view(request,*args,**kwargs):
     return render(request,"pages/home.html",context={},status=200)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def tweet_create_view(request,*args,**kwargs):
     serializer = TweetSerializer(data=request.POST)
     if serializer.is_valid(raise_exception=True):
@@ -37,6 +41,19 @@ def tweet_detail_view(request,tweet_id,*args,**kwargs):
     obj=QuerySet.first()
     serializer = TweetSerializer(obj)
     return Response(serializer.data,status=200)
+
+@api_view(['DELETE','POST'])
+@permission_classes([IsAuthenticated])
+def tweet_delete_view(request,tweet_id,*args,**kwargs):
+    Queryset = Tweet.objects.filter(id=tweet_id)
+    if not Queryset.exists():
+        return Response({},status=404)
+    Queryset = Queryset.filter(user=request.user)
+    if not Queryset.exists():
+        return Response({"message":"You cannot delete this"},status=401)
+    obj=Queryset.first()
+    obj.delete()
+    return Response({"messaage":"Tweet deleted"},status=200)
 
 
 def tweet_create_view_pure_django(request,*args,**kwargs):
